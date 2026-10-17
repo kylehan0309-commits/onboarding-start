@@ -54,25 +54,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-//Transaction Finalization
-
-reg transaction_ready; //Need one bit for yes or no
-reg[15:0] data; //16 bit to transfer data from shiftReg
-
-always @(posedge clk or negedge rst_n) begin
-    if(!rst_n) begin //Reset reg
-        transaction_ready <= 1'b0;
-        data <= 16'b0;
-    end else begin
-        transaction_ready <= 1'b0;
-        if(ncsPos && bitCount == 16) begin //If nCS is rising edge and edge count is 16, move contents of shiftReg into data and set transaction_ready to 1(true)
-            data <= shiftReg;
-            transaction_ready <= 1'b1;
-        end
-    end 
-end
-
-//Address Validation
+//Address Validation & Register Update
 
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin //Reset reg
@@ -82,8 +64,8 @@ always @(posedge clk or negedge rst_n) begin
         en_reg_pwm_15_8 <= 8'h00;
         pwm_duty_cycle <= 8'h00;
     end else if(transaction_ready) begin //Complete 16 bit is ready
-        if(data[15]) begin //If write is true
-            case(data[14:8]) //Route data[7:0] to dedicated register
+        if(ncsPos && bitCount == 5'd16 && shiftReg[15]) begin //If write is true
+            case(shiftReg[14:8]) //Route data[7:0] to dedicated register
                 7'h00: en_reg_out_7_0  <= data[7:0]; 
                 7'h01: en_reg_out_15_8 <= data[7:0];
                 7'h02: en_reg_pwm_7_0  <= data[7:0];
