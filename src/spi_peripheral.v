@@ -65,11 +65,11 @@ always @(posedge clk or negedge rst_n) begin
         pwm_duty_cycle <= 8'h00;
     end else if(ncsPos && bitCount == 5'd16 && shiftReg[15]) begin //If write is true
         case(shiftReg[14:8]) //Route data[7:0] to dedicated register
-            7'h00: en_reg_out_7_0  <= data[7:0]; 
-            7'h01: en_reg_out_15_8 <= data[7:0];
-            7'h02: en_reg_pwm_7_0  <= data[7:0];
-            7'h03: en_reg_pwm_15_8 <= data[7:0]; 
-            7'h04: pwm_duty_cycle  <= data[7:0]; 
+            7'h00: en_reg_out_7_0  <= shiftReg[7:0]; 
+            7'h01: en_reg_out_15_8 <= shiftReg[7:0];
+            7'h02: en_reg_pwm_7_0  <= shiftReg[7:0];
+            7'h03: en_reg_pwm_15_8 <= shiftReg[7:0]; 
+            7'h04: pwm_duty_cycle  <= shiftReg[7:0]; 
             default: ; //Ignore other addresses
         endcase
     end
