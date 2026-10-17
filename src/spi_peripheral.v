@@ -54,7 +54,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-//Address Validation & Register Update
+//Address Validation & Register Update & Transaction Finalization
 
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin //Reset reg
