@@ -171,9 +171,15 @@ async def test_pwm_freq(dut):
     await ClockCycles(dut.clk, 4000)
 
     # Time between two rising edges to one period
-    await RisingEdge(dut.uo_out[0])
+    while (int(dut.uo_out.value) & 1) == 1:
+        await RisingEdge(dut.clk)
+    while (int(dut.uo_out.value) & 1) == 0:
+        await RisingEdge(dut.clk)
     t1 = cocotb.utils.get_sim_time(units = "ns")
-    await RisingEdge(dut.uo_out[0])
+    while (int(dut.uo_out.value) & 1) == 1:
+        await RisingEdge(dut.clk)
+    while (int(dut.uo_out.value) & 1) == 0:
+        await RisingEdge(dut.clk)
     t2 = cocotb.utils.get_sim_time(units = "ns")
 
     period = t2 - t1
@@ -205,11 +211,16 @@ async def test_pwm_duty(dut):
     # 50% (0x80 = 128, and 128/256 = 50%)
     await send_spi_transaction(dut, 1, 0x04, 0x80)
     await ClockCycles(dut.clk, 4000)
-    await RisingEdge(dut.uo_out[0])
+    while (int(dut.uo_out.value) & 1) == 1:   # get to the low part first
+        await RisingEdge(dut.clk)
+    while (int(dut.uo_out.value) & 1) == 0:   # rising edge
+        await RisingEdge(dut.clk)
     t_rise = cocotb.utils.get_sim_time(units = "ns")
-    await FallingEdge(dut.uo_out[0])
+    while (int(dut.uo_out.value) & 1) == 1:   # falling edge
+        await RisingEdge(dut.clk)
     t_fall = cocotb.utils.get_sim_time(units = "ns")
-    await RisingEdge(dut.uo_out[0])
+    while (int(dut.uo_out.value) & 1) == 0:   # next rising edge
+        await RisingEdge(dut.clk)
     t_rise2 = cocotb.utils.get_sim_time(units = "ns")
     duty = (t_fall - t_rise) / (t_rise2 - t_rise) * 100
     assert 49 <= duty <= 51, f"Duty {duty:.2f}% not within 50% +/- 1%"
